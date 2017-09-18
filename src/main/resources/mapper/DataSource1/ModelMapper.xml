@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tongyuan.model.dao.ModelMapper">
+    <resultMap id="baseResultMap" type="com.tongyuan.model.domain.Model">
+        <id column="id" property="id" jdbcType="BIGINT"  />
+        <result column="parent_id" property="parentId" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="classes" property="classes" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="directory_id" property="directoryId" jdbcType="BIGINT"/>
+        <result column="discription" property="discription" jdbcType="VARCHAR"/>
+        <result column="Import" property="Import" jdbcType="VARCHAR"/>
+        <result column="Extends" property="Extends" jdbcType="VARCHAR"/>
+        <result column="model_file_path" property="modelFilePath" jdbcType="VARCHAR"/>
+        <result column="icon_svg_path" property="iconSvgPath" jdbcType="VARCHAR"/>
+        <result column="diagram_svg_path" property="diagramSvgPath" jdbcType="VARCHAR"/>
+        <result column="info_text_path" property="infoTextPath" jdbcType="VARCHAR"/>
+        <result column="is_deleted" property="isDeleted" jdbcType="BOOLEAN"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="DATE"/>
+        <result column="last_update_time" property="lastUpdateTime" jdbcType="DATE"/>
+        <result column="scope" property="scope" jdbcType="BOOLEAN"/>
+    </resultMap>
+
+    <sql id="baseColumnList" >
+        id,parent_id,name,classes,type,directory_id,discription,Import,Extends,model_file_path,icon_svg_path,diagram_svg_path,
+        info_text_path,is_deleted,user_id,create_time,last_update_time,scope
+    </sql>
+
+    <insert id="add" parameterType="com.tongyuan.model.domain.Model">
+        INSERT INTO model (parent_id, name,classes,type,directory_id,discription,Import,Extends,model_file_path,icon_svg_path,diagram_svg_path,
+        info_text_path,is_deleted,user_id,create_time,last_update_time,scope) VALUES (#{parentId}, #{name}, #{classes},#{type}, #{directoryId}, #{discription},#{Import}, #{Extends},#{modelFilePath}, #{iconSvgPath},
+        #{diagramSvgPath}, #{infoTextPath}, #{isDeleted},#{userId}, #{createTime}, #{lastUpdateTime},#{scope})
+    </insert>
+    <update id="update" parameterType="com.tongyuan.model.domain.Model">
+        UPDATE model SET
+        parent_id = #{parentId},name = #{name},classes = #{classes},type = #{type},directory_id = #{directoryId},discription = #{discription},Import = #{Import},Extends = #{Extends},model_file_path =#{modelFilePath},icon_svg_path = #{iconSvgPath}
+         ,diagram_svg_path = #{diagramSvgPath},info_text_path = #{infoTextPath},is_deleted = #{isDeleted},user_id = #{userId},create_time = #{createTime},last_update_time = #{lastUpdateTime},scope = #{scope}
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteByIds"  parameterType="java.lang.String">
+        DELETE FROM model WHERE id in
+        <foreach item="idItem" collection="array" open="(" separator="," close=")">
+            #{idItem}
+        </foreach>
+    </delete>
+    <select id="queryModelList" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Model">
+        SELECT
+        <include refid="baseColumnList"></include>
+        FROM model
+        <where>
+            1 = 1 and isDeleted = "0"
+        </where>
+    </select>
+    <select id="queryModelByName" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Model">
+        SELECT
+        <include refid="baseColumnList"></include>
+        FROM model
+        where name = #{name} and is_deleted = "0"
+    </select>
+    <select id="findAllModel" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Model">
+        SELECT
+        <include refid="baseColumnList" ></include> FROM
+        (SELECT
+        <include refid="baseColumnList" ></include>
+        FROM  model
+        WHERE
+        is_deleted = "0"
+        order by create_time desc) m
+        where  1=1 GROUP BY NAME
+    </select>
+    <select id="findRootModel" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Model">
+        SELECT
+        <include refid="baseColumnList" ></include> FROM
+        (SELECT
+        <include refid="baseColumnList" ></include>
+        FROM  model
+        WHERE
+        is_deleted = "0"
+        and parent_id = "0"
+        order by create_time desc) m
+        where  1=1 GROUP BY NAME
+    </select>
+    <select id="vagueSearchByName" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Model">
+        SELECT
+        <include refid="baseColumnList" ></include> FROM
+        (SELECT
+        <include refid="baseColumnList" ></include>
+        FROM  model
+        WHERE
+        is_deleted = "0"
+        <if test="name != null and name !=''">
+            AND name like CONCAT(CONCAT('%',#{name,jdbcType=VARCHAR}),'%')
+        </if>
+        order by create_time desc) m
+        where  1=1 GROUP BY NAME
+    </select>
+</mapper>

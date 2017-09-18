@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tongyuan.model.dao.ReviewNodeMapper">
+    <resultMap id="baseResultMap" type="com.tongyuan.model.domain.ReviewNode">
+        <id column="node_id" property="nodeId" jdbcType="BIGINT"  />
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="node_name" property="nodeName" jdbcType="VARCHAR"/>
+        <result column="sequence" property="sequence" jdbcType="VARCHAR"/>
+        <result column="template_id" property="templateId" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="baseColumnList">
+        node_id,description,node_name,sequence,template_id,user_id
+    </sql>
+
+    <insert id="add" parameterType="com.tongyuan.model.domain.ReviewNode">
+        INSERT INTO review_node
+        (description,node_name,sequence,template_id,user_id)
+        VALUES
+        (#{description},#{nodeName},#{sequence},#{templateId},#{userId})
+    </insert>
+
+    <select id="queryByTemplateId" parameterType="java.util.Map" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM review_node
+        WHERE template_id=#{templateId}
+    </select>
+
+    <select id="queryByNodeId" parameterType="java.lang.Long" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM review_node
+        WHERE node_id=#{nodeId}
+    </select>
+
+    <delete id="reset" parameterType="java.lang.Long">
+        DELETE FROM review_node WHERE template_id=#{templateId}
+    </delete>
+
+</mapper>

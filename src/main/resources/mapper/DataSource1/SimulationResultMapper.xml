@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tongyuan.model.dao.SimulationResultMapper">
+    <resultMap id="baseResultMap" type="com.tongyuan.model.domain.SimulationResult">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="model_id" property="modelId" jdbcType="BIGINT"/>
+        <result column="model_version" property="modelVersion" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="simu_name" property="simuName" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
+        <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
+        <result column="sim_step" property="simStep" jdbcType="DOUBLE"/>
+        <result column="algorithm" property="algorithm" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="baseColumnList" >
+        id,model_id,model_version,user_id,simu_name,description,start_time,end_time,sim_step,algorithm
+    </sql>
+
+    <insert id="add" parameterType="com.tongyuan.model.domain.SimulationResult">
+        INSERT INTO simulation_result(model_id,model_version,user_id,simu_name,description,start_time,end_time,sim_step,algorithm)
+        values(#{modelId},#{modelVersion},#{userId},#{simuName},#{description},#{startTime},#{endTime},#{simStep},#{algorithm})
+    </insert>
+
+    <delete id="deleteByIds" parameterType="java.lang.String">
+        DELETE FROM simulation_result WHERE id IN
+        <foreach item="idItem" collection="array" open="(" separator="," close=")">
+            #{idItem}
+        </foreach>
+    </delete>
+
+    <select id="queryByName" resultMap="baseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="baseColumnList"/>
+        from simulation_result
+        <where>
+            1=1
+            <if test="simuName!=null and simuName!=''">
+                AND simu_name LIKE CONCAT(CONCAT('%',#{simuName,jdbcType=VARCHAR}),'%')
+            </if>
+        </where>
+    </select>
+</mapper>

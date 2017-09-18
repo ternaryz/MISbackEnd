@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tongyuan.model.dao.ReviewFlowInstanceMapper">
+    <resultMap id="baseResultMap" type="com.tongyuan.model.domain.ReviewFlowInstance">
+        <id column="instance_id" property="instanceId" jdbcType="BIGINT"  />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="instance_name" property="instanceName" jdbcType="VARCHAR"/>
+        <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP"/>
+        <result column="model_id" property="modelId" jdbcType="BIGINT"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="template_id" property="templateId" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="baseColumnList">
+        instance_id,create_time,description,instance_name,last_update_time,model_id,status,template_id
+    </sql>
+
+    <insert id="add" parameterType="com.tongyuan.model.domain.ReviewNodeInstance" useGeneratedKeys="true" keyProperty="instanceId">
+        INSERT INTO review_flow_instance
+        (create_time,description,instance_name,last_update_time,model_id,status,template_id)
+        VALUES
+        (#{createTime},#{description},#{instanceName},#{lastUpdateTime},#{modelId},#{status},#{templateId})
+    </insert>
+
+    <select id="queryByInstanceId" parameterType="java.lang.Long" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM review_flow_instance
+        WHERE instance_id=#{instanceId}
+    </select>
+
+    <delete id="deleteByInstanceIds" parameterType="java.lang.String">
+        DELETE FROM review_flow_instance WHERE instance_id IN
+        <foreach item="idItem" collection="array" open="(" separator="," close=")">
+            #{idItem}
+        </foreach>
+    </delete>
+
+    <update id="setStatus" parameterType="java.util.Map">
+        UPDATE review_flow_instance
+        SET status=#{status}
+        WHERE instance_id=#{instanceId}
+    </update>
+
+    <select id="queryByNameAndStatus" parameterType="java.util.Map" resultMap="baseResultMap">
+        SELECT
+         <include refid="baseColumnList"/>
+        FROM review_flow_instance
+        WHERE 1=1
+        <if test="instanceName!=null and instanceName!=''">
+            AND instance_name LIKE CONCAT(CONCAT('%',#{instanceName,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="status!=null and status!=''">
+            AND status=#{status}
+        </if>
+    </select>
+
+    <update id="updateTime" parameterType="java.util.Map">
+        UPDATE review_flow_instance
+        SET last_update_time=#{lastUpdateTime}
+        WHERE instance_id=#{instanceId}
+    </update>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tongyuan.model.dao.UserMapper">
+    <resultMap id="baseResultMap" type="com.tongyuan.model.domain.User">
+        <id column="id" property="id" jdbcType="BIGINT"  />
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="pass_word" property="passWord" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="baseColumnList" >
+        id, user_name, pass_word
+    </sql>
+    <insert id="add"></insert>
+    <update id="update"></update>
+    <delete id="deleteByIds"></delete>
+    <select id="queryUserById" resultType="com.tongyuan.model.domain.User"></select>
+    <select id="querUserByName" resultMap="baseResultMap"  resultType="com.tongyuan.model.domain.User">
+        SELECT
+        <include refid="baseColumnList"></include>
+        FROM USER
+        where user_name = #{userName}
+    </select>
+
+    <select id="getUserByName" resultMap="baseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER
+        WHERE user_name = #{userName}
+    </select>
+
+</mapper>

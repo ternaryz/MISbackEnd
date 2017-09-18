@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tongyuan.model.dao.DirectoryMapper">
+    <resultMap id="baseResultMap" type="com.tongyuan.model.domain.Directory">
+        <id column="id" property="id" jdbcType="BIGINT"  />
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="parent_id" property="parentId" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="DATE"/>
+        <result column="last_update_time" property="lastUpdateTime" jdbcType="DATE"/>
+        <result column="absolute_address" property="absoluteAddress" jdbcType="VARCHAR"/>
+        <result column="relative_address" property="relativeAddress" jdbcType="VARCHAR"/>
+        <result column="is_deleted" property="isDeleted" jdbcType="BOOLEAN"/>
+    </resultMap>
+
+    <sql id="baseColumnList" >
+        id, name, description,parent_id,create_time,last_update_time,absolute_address,relative_address,is_deleted
+    </sql>
+    <insert id="add"  parameterType="com.tongyuan.model.domain.Directory">
+        INSERT INTO directory (name, description,parent_id,create_time,last_update_time,absolute_address,relative_address,is_deleted) VALUES
+        (#{name}, #{description}, #{parentId},#{createTime}, #{lastUpdateTime}, #{absoluteAddress},#{relativeAddress}, #{isDeleted})
+    </insert>
+    <update id="update" parameterType="com.tongyuan.model.domain.Directory">
+            UPDATE directory SET
+            name = #{name},description = #{description},parent_id = #{parentId},create_time = #{createTime},last_update_time = #{lastUpdateTime},absolute_address = #{absoluteAddress},relative_address = #{relativeAddress},is_deleted = #{isDeleted}
+            WHERE id = #{id}
+    </update>
+    <delete id="deleteByIds" parameterType="java.lang.String">
+        DELETE FROM directory WHERE id in
+        <foreach item="idItem" collection="array" open="(" separator="," close=")">
+            #{idItem}
+        </foreach>
+    </delete>
+    <select id="queryListByPath" resultMap="baseResultMap" resultType="java.lang.String">
+        SELECT
+        <include refid="baseColumnList" />
+        FROM directory
+        where absolute_address = #{absoluteAddress}
+        and is_deleted = "0"
+    </select>
+    <select id="queryListByName" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Directory" parameterType="java.lang.String">
+        SELECT
+        <include refid="baseColumnList" ></include> FROM
+        (SELECT
+        <include refid="baseColumnList" ></include>
+        FROM  directory
+        WHERE parent_id = "0"
+        <if test="name != null and name !=''">
+            AND name = #{name,jdbcType=VARCHAR}
+        </if>
+        and is_deleted = "0"
+        order by create_time desc) m
+        where  1=1 GROUP BY NAME
+    </select>
+    <select id="findAllDirectory" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Directory" >
+        SELECT
+        <include refid="baseColumnList" ></include> FROM
+        (SELECT
+        <include refid="baseColumnList" ></include>
+        FROM  directory
+        WHERE
+         is_deleted = "0"
+        order by create_time desc) m
+        where  1=1 GROUP BY NAME
+    </select>
+    <select id="findRootDirectory" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Directory">
+        SELECT
+        <include refid="baseColumnList" ></include> FROM
+        (SELECT
+        <include refid="baseColumnList" ></include>
+        FROM  directory
+        WHERE
+        is_deleted = "0"
+        and parent_id = "0"
+        order by create_time desc) m
+        where  1=1 GROUP BY NAME
+    </select>
+    <select id="findRootDirectoryList" resultType="com.tongyuan.model.domain.Directory">
+        SELECT
+        <include refid="baseColumnList" ></include> FROM
+        (SELECT
+        <include refid="baseColumnList" ></include>
+        FROM  directory
+        WHERE
+        is_deleted = "0"
+        and parent_id = "0"
+        order by create_time desc) m
+        where  1=1 GROUP BY NAME
+    </select>
+    <select id="queryListByParentId" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Directory">
+        SELECT
+        <include refid="baseColumnList" />
+        FROM directory
+        where parent_id = #{parentId}
+        and is_deleted = "0"
+    </select>
+    <select id="queryListById" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Directory">
+        SELECT
+        <include refid="baseColumnList" />
+        FROM directory
+        where id = #{id}
+        and is_deleted = "0"
+    </select>
+    <select id="queryByParentName" resultMap="baseResultMap" resultType="com.tongyuan.model.domain.Directory">
+        SELECT
+        <include refid="baseColumnList" />
+        FROM directory
+        WHERE
+        is_deleted = "0"
+        <if test="name != null and name !=''">
+            AND name = #{name,jdbcType=VARCHAR}
+        </if>
+        <if test="parent_id != null and parent_id !=''">
+            AND parent_id = #{parentId,jdbcType=BIGINT}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tongyuan.model.dao.NodeInstanceAndNodeMapper">
+    <resultMap id="baseResultMap" type="com.tongyuan.model.domain.ReviewNodeInstance">
+        <id column="id" property="id" jdbcType="BIGINT"  />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="instance_id" property="instanceId" jdbcType="BIGINT"/>
+        <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP"/>
+        <result column="node_id" property="nodeId" jdbcType="BIGINT"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <resultMap id="pageResultMap" type="com.tongyuan.model.domain.CheckorPage">
+        <id property="id" column="review_flow_instance_instance_id"/>
+        <result property="createTime" column="review_flow_instance_create_time"/>
+        <result property="description" column="review_flow_instance_description"/>
+        <result property="lastUpdateTime" column="review_flow_instance_last_update_time"/>
+        <result property="instanceName" column="review_flow_instance_instance_name"/>
+        <association property="model" javaType="com.tongyuan.model.domain.Model">
+            <id property="id" column="id"/>
+            <result property="name" column="model_name"/>
+        </association>
+        <association property="template" javaType="com.tongyuan.model.domain.ReviewFlowTemplate">
+            <id property="templateId" column="review_flow_template_template_id"/>
+            <result column="review_flow_template_template_name" property="templateName"/>
+        </association>
+    </resultMap>
+
+
+    <!--审核者按照审签实例的实例名来查找  只能看到轮到自己审核的，且状态为激活的-->
+    <select id="queryByReviewer" resultMap="pageResultMap" parameterType="java.util.Map">
+        SELECT
+        A.instance_id  AS review_flow_instance_instance_id,
+        A.create_time AS review_flow_instance_create_time,
+        A.last_update_time AS review_flow_instance_last_update_time,
+        A.description AS review_flow_instance_description,
+        A.instance_name AS review_flow_instance_instance_name,
+        B.name AS model_name,
+        C.template_id AS review_flow_template_template_id,
+        C.template_name AS review_flow_template_template_name
+
+        FROM  review_flow_instance A
+        INNER JOIN model B ON  A.model_id = B.id
+        INNER JOIN review_flow_template C ON A.template_id = C.template_id
+        INNER JOIN review_node_instance D ON A.instance_id = D.instance_id
+        INNER JOIN review_node E ON D.node_id = E.node_id
+        WHERE
+        D.status = 2 AND E.user_id = #{userId}
+        <if test="instanceName!=null and instanceName!=''">
+            AND A.instanceName LIKE CONCAT(CONCAT('%',#{instanceName,jdbcType=VARCHAR}),'%')
+        </if>
+    </select>
+
+
+    <sql id="baseColumnList">
+        id,create_time,instance_id,last_update_time,review_node_instance.node_id,status
+    </sql>
+
+    <select id="queryAfterAgree" resultMap="baseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM review_node_instance , review_node
+        WHERE review_node_instance.node_id = review_node.node_id
+        AND review_node.sequence=#{sequence}
+        AND review_node_instance.instance_id = #{instanceId}
+    </select>
+
+
+</mapper>

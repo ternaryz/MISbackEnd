@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tongyuan.model.dao.ReviewFlowTemplateMapper">
+    <resultMap id="baseResultMap" type="com.tongyuan.model.domain.ReviewFlowTemplate">
+        <id column="template_id" property="templateId" jdbcType="BIGINT"  />
+        <result column="already_config" property="alreadyConfig" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="default_template" property="defaultTemplate" jdbcType="TINYINT"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP"/>
+        <result column="template_name" property="templateName" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="baseColumnList">
+        template_id,already_config,create_time,default_template,description,last_update_time,template_name,user_id
+    </sql>
+
+    <insert id="add" parameterType="com.tongyuan.model.domain.ReviewFlowTemplate">
+        INSERT into review_flow_template
+        (already_config,create_time,default_template,description,last_update_time,template_name,user_id)
+        VALUES
+        (#{alreadyConfig},#{createTime},#{defaultTemplate},#{description},#{lastUpdateTime},#{templateName},#{userId})
+    </insert>
+
+    <update id="changeAlreadyConfig" parameterType="java.lang.Long">
+        UPDATE review_flow_template
+        SET already_config = true WHERE template_id = #{templateId}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.String">
+        DELETE FROM review_flow_template WHERE template_id in
+        <foreach item="idItem" collection="array" open="(" separator="," close=")">
+            #{idItem}
+        </foreach>
+    </delete>
+
+    <select id="queryByName" parameterType="java.util.Map" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumnList"/>
+        from review_flow_template
+        WHERE 1=1
+        <if test="templateName!=null and templateName!=''">
+            AND template_name like CONCAT(CONCAT('%',#{templateName,jdbcType=VARCHAR}),'%')
+        </if>
+    </select>
+
+    <select id="queryById" parameterType="java.lang.Long" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumnList"/>
+        from review_flow_template
+        WHERE template_id = #{templateId}
+    </select>
+
+    <update id="updateTime" parameterType="java.util.Map">
+        UPDATE review_flow_template
+        SET last_update_time=#{lastUpdateTime} WHERE template_id=#{templateId}
+    </update>
+
+    <select id="getTemplateByDefault" resultMap="baseResultMap">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM review_flow_template
+        WHERE default_template = TRUE
+    </select>
+
+</mapper>
