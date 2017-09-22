@@ -11,7 +11,7 @@
     </resultMap>
 
     <resultMap id="pageResultMap" type="com.tongyuan.model.domain.CheckorPage">
-        <id property="id" column="review_flow_instance_instance_id"/>
+        <id property="id" column="review_node_instance_id"/>
         <result property="createTime" column="review_flow_instance_create_time"/>
         <result property="description" column="review_flow_instance_description"/>
         <result property="lastUpdateTime" column="review_flow_instance_last_update_time"/>
@@ -30,7 +30,7 @@
     <!--审核者按照审签实例的实例名来查找  只能看到轮到自己审核的，且状态为激活的-->
     <select id="queryByReviewer" resultMap="pageResultMap" parameterType="java.util.Map">
         SELECT
-        A.instance_id  AS review_flow_instance_instance_id,
+        D.id AS review_node_instance_id,
         A.create_time AS review_flow_instance_create_time,
         A.last_update_time AS review_flow_instance_last_update_time,
         A.description AS review_flow_instance_description,
